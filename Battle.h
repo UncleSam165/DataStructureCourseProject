@@ -50,6 +50,8 @@ public:
 	void Kill(Enemy*& E);
 	void CastleAttack();
 	void CastleFreeze();
+	void RestoreFrozen();
+	void Save();
 };
  
 

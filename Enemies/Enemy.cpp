@@ -94,6 +94,23 @@ double Enemy::GetPower()const {
 	return Power;
 }
 
+void Enemy::SetFreezingTime(int S)
+{
+	if (GetType() == FIGHTER || GetType() == HEALER)
+	{
+		FreezingTime = 2 * (1 / S) * 5;   // Assuming that the castle freezing power = 5
+	}
+	else
+	{
+		FreezingTime = (1 / S) * 5;
+	}
+}
+
+int Enemy::GetFreezingTime() const
+{
+	return FreezingTime;
+}
+
 int Enemy::GetFirstShot(){
 	return FirstShot;
 }

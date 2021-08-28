@@ -2,6 +2,8 @@
 #include <time.h>
 #include "ReadInputFile.h"
 #include "./Defs.h"
+#include <fstream>
+#include <string>
 
 Battle::Battle()
 {
@@ -108,6 +110,12 @@ void Battle::Fight()
 
 void Battle::DeleteKilledEnemy()
 {
+	Enemy* E;
+	while (!Q_KilledEnemies.isEmpty())
+	{
+		Q_KilledEnemies.dequeue(E);
+		delete E;
+	}
 }
 
 //Add enemy lists (inactive, active,.....) to drawing list to be displayed on user interface
@@ -282,22 +290,74 @@ void Battle::CastleFreeze() {
 			Q_ActiveFighter.dequeue(E);
 			ActiveFighters--;
 			FrostedFighters++;
+			E->SetFreezingTime(E->GetDistance());
 		}
 		else {
 			if (!Q_ActiveHealer.isEmpty()) {
 				Q_ActiveHealer.pop(E);
 				ActiveHealers--;
 				FrostedHealers++;
+				E->SetFreezingTime(E->GetDistance());
 			}
 			else {
 				if (!Q_ActiveFreezer.isEmpty()) {
 					Q_ActiveFreezer.dequeue(E);
 					ActiveFreezers--;
 					FrostedFreezers++;
+					E->SetFreezingTime(E->GetDistance());
 				}
 			}
 		}
 		E->SetStatus(FRST);
 		Q_FrozenEnemies.enqueue(E);
 	}
+}
+
+void Battle::RestoreFrozen()
+{
+	Enemy* E;
+	while(!Q_FrozenEnemies.isEmpty())
+	{
+		if (E->GetFreezingTime() == 0)
+		{
+			if (E->GetType() == FIGHTER) 
+			{
+				Q_ActiveFighter.enqueue(E,E->GetHealth());
+				ActiveFighters++;
+				FrostedFighters--;
+			}
+			else if (!Q_ActiveHealer.isEmpty()) 
+			{
+				Q_ActiveHealer.push(E);
+				ActiveHealers++;
+				FrostedHealers--;
+			}
+			else if (!Q_ActiveFreezer.isEmpty()) 
+			{
+				Q_ActiveFreezer.enqueue(E);
+				ActiveFreezers++;
+				FrostedFreezers--;
+			}		
+		}
+		E->SetStatus(ACTV);
+		Q_FrozenEnemies.dequeue(E);
+	}
+}
+
+
+void Battle::Save()
+{
+	ofstream myfile;
+	myfile.open("example.txt");
+
+	if (BattleCheck() == WIN)
+		myfile << "Game Is WIN.\n";
+	else if (BattleCheck() == LOSS)
+		myfile << "Game Is LOSS.\n";
+	else
+		myfile << "Game Is DRAWN.\n";
+
+	myfile << "KTS\t ID\t FD\t KD\t LT\n";
+
+	myfile.close();
 }

@@ -28,6 +28,7 @@ protected:
 	int FirstShotDelay;         //The time elapsed until an enemy is first shot by castle
 	int KillDelay;              //The time elapsed between first time a castle shoots the enemy and its kill time
 	int LifeTime;               //The total time an enemy stays alive until being killed
+	int FreezingTime;
 
 public:
 	Enemy(int id,int arrTime, int d = MaxDistance);
@@ -57,6 +58,9 @@ public:
 
 	void SetPower(double P);
 	double GetPower() const;
+
+	void SetFreezingTime(int S);
+	int GetFreezingTime() const;
 
 	int GetFirstShot();
 	int GetTimeKilled();
