@@ -17,7 +17,6 @@ private:
 	int ActiveCount, ActiveFighters, ActiveHealers, ActiveFreezers, 
 	FrostedCount,FrostedFighters,FrostedHealers,FrostedFreezers,
 	KilledCount,KilledFighters,KilledHealers,KilledFreezers;	//no. of enemies (Active, Frosted, killed so far)
-	int CurrentTimeStep;
 	Enemy * BEnemiesForDraw[MaxEnemyCount]; // This Array of Pointers is used for drawing elements in the GUI
 								  			// No matter what list type you are using to hold enemies, 
 											// you must pass the enemies to the GUI function as an array of enemy pointers. 
