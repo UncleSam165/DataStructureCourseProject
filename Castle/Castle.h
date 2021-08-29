@@ -23,7 +23,7 @@ public:
 
 	double GetHealth() const;
 	void SetHealth(double h);
-	void DecrementHealth();
+	void DecrementHealth(double damage);
 
 	double GetPower() const;
 	void SetPower(double P);
