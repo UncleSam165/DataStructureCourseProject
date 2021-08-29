@@ -3,6 +3,7 @@
 
 Fighter::Fighter(int id, int arrTime, int d) :Enemy(id, arrTime, d) {
 	Type = FIGHTER;
+        K=1;
 }
 
 
