@@ -94,6 +94,14 @@ double Enemy::GetPower()const {
 	return Power;
 }
 
+void Enemy::SetHealthHeal(double HH) {
+         HealthHeal=HH;
+} 
+
+double Enemy::GetHealthHeal(){
+          return HealthHeal;
+} 
+
 void Enemy::SetFreezingTime(int S)
 {
 	if (GetType() == FIGHTER || GetType() == HEALER)
