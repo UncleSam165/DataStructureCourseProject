@@ -1,9 +1,4 @@
 #include "Battle.h"
-#include <time.h>
-#include "ReadInputFile.h"
-#include "./Defs.h"
-#include <fstream>
-#include <string>
 
 Battle::Battle()
 {
@@ -28,13 +23,13 @@ Battle::Battle()
 
 void Battle::AddEnemy(Enemy* Ptr)
 {
-	if(Ptr->GetType() == FIGHTER){
+	if(dynamic_cast<Fighter*>(Ptr)){
 		Q_ActiveFighter.enqueue(Ptr, Ptr->GetPower() * Ptr->GetHealth() * (static_cast<double>(Ptr->GetStatus()) / (double)Ptr->GetDistance()));
 		ActiveFighters++;
-	}else if(Ptr->GetType() == HEALER){
+	}else if(dynamic_cast<Healer*>(Ptr)){
 		Q_ActiveHealer.push(Ptr);
 		ActiveHealers++;
-	}else if(Ptr->GetType() == FREEZER){
+	}else if(dynamic_cast<Freezer*>(Ptr)){
 		Q_ActiveFreezer.enqueue(Ptr);
 		ActiveFreezers++;
 	}
@@ -59,8 +54,10 @@ void Battle::RunSimulation()
 		Interactive();
 		break;
 	case MODE_STEP:
+		StepByStep();
 		break;
 	case MODE_SLNT:
+		Silent();
 		break;
 	
 
@@ -85,7 +82,7 @@ void Battle::ActivateEnemies()
 		ActiveCount++;
 		AddEnemy(pE);		//move it to Enemy List
 	}
-
+	
 }
 
 void Battle::Move()
@@ -106,10 +103,20 @@ void Battle::Move()
 
 void Battle::Fight()
 {
+	
 	ActivateCastle();
 	DefrostEnemies();
 	RestoreFrozen();
-	CastleAttack();
+	
+	Move();
+	
+	int FProb = 20; int Prob;
+	Prob = rand() % 100;
+	if (Prob < FProb)
+		CastleFreeze();
+	else
+		CastleAttack();
+	EnemyAct();
 }
 
 void Battle::DeleteKilledEnemy()
@@ -168,7 +175,7 @@ void Battle::Interactive(){
 
 	CurrentTimeStep = 0;
 	ReadInputFile(FileName, Q_Inactive, BCastle);
-	cout << BCastle.GetHealth() << endl;;
+
 	AddAllListsToDrawingList();
 	pGUI->UpdateInterface(CurrentTimeStep, BCastle.GetHealth(), BCastle.GetStatus(), ActiveCount, ActiveFighters, ActiveHealers, ActiveFreezers,
 		FrostedCount, FrostedFighters, FrostedHealers, FrostedFreezers,
@@ -176,7 +183,7 @@ void Battle::Interactive(){
 
 	pGUI->waitForClick();
 
-	while (&BCastle && (!Q_Inactive.isEmpty() || !Q_ActiveFighter.isEmpty() || !Q_ActiveFreezer.isEmpty() || !Q_ActiveHealer.isEmpty() || !Q_FrozenEnemies.isEmpty()))	//as long as some enemies are alive (should be updated in next phases)
+	while (BCastle.GetHealth()>0 && (!Q_Inactive.isEmpty() || !Q_ActiveFighter.isEmpty() || !Q_ActiveFreezer.isEmpty() || !Q_ActiveHealer.isEmpty() || !Q_FrozenEnemies.isEmpty()))	//as long as some enemies are alive (should be updated in next phases)
 	{
 		CurrentTimeStep++;
 		ActivateEnemies();
@@ -190,10 +197,71 @@ void Battle::Interactive(){
 			KilledCount, KilledFighters, KilledHealers, KilledFreezers);
 		pGUI->waitForClick();
 	}
+	BattleCheck();
+	Save();
+	pGUI->PrintMessage("Output File is Saved ... Click to Close");
+	pGUI->waitForClick();
+}
+
+void Battle::StepByStep() {
+		pGUI->PrintMessage("StepByStep Mode Selected ... Please Enter the input file Name and Destination:");
+		string FileName = pGUI->GetString().c_str();	//get user input as a string then convert to integer
+
+		pGUI->PrintMessage("Enemies is being loaded from the file...CLICK to continue");
+		pGUI->waitForClick();
+
+		CurrentTimeStep = 0;
+		ReadInputFile(FileName, Q_Inactive, BCastle);
+
+		AddAllListsToDrawingList();
+		pGUI->UpdateInterface(CurrentTimeStep, BCastle.GetHealth(), BCastle.GetStatus(), ActiveCount, ActiveFighters, ActiveHealers, ActiveFreezers,
+			FrostedCount, FrostedFighters, FrostedHealers, FrostedFreezers,
+			KilledCount, KilledFighters, KilledHealers, KilledFreezers);	//upadte interface to show the initial case where all enemies are still inactive
+
+		Sleep(1000);
+		while (BCastle.GetHealth() > 0 && (!Q_Inactive.isEmpty() || !Q_ActiveFighter.isEmpty() || !Q_ActiveFreezer.isEmpty() || !Q_ActiveHealer.isEmpty() || !Q_FrozenEnemies.isEmpty()))	//as long as some enemies are alive (should be updated in next phases)
+		{
+			CurrentTimeStep++;
+			ActivateEnemies();
+
+			Fight();
+
+			pGUI->ResetDrawingList();
+			AddAllListsToDrawingList();
+			pGUI->UpdateInterface(CurrentTimeStep, BCastle.GetHealth(), BCastle.GetStatus(), ActiveCount, ActiveFighters, ActiveHealers, ActiveFreezers,
+				FrostedCount, FrostedFighters, FrostedHealers, FrostedFreezers,
+				KilledCount, KilledFighters, KilledHealers, KilledFreezers);
+			Sleep(1000);
+		}
+		BattleCheck();
+		Save();
+		pGUI->PrintMessage("Output File is Saved ... Click to Close");
 
 }
 
+void Battle::Silent() {
+	pGUI->PrintMessage("StepByStep Mode Selected ... Please Enter the input file Name and Destination:");
+	string FileName = pGUI->GetString().c_str();	//get user input as a string then convert to integer
 
+	pGUI->PrintMessage("Enemies is being loaded from the file...CLICK to continue");
+	pGUI->waitForClick();
+
+	CurrentTimeStep = 0;
+	ReadInputFile(FileName, Q_Inactive, BCastle);
+
+
+	while (BCastle.GetHealth() > 0 && (!Q_Inactive.isEmpty() || !Q_ActiveFighter.isEmpty() || !Q_ActiveFreezer.isEmpty() || !Q_ActiveHealer.isEmpty() || !Q_FrozenEnemies.isEmpty()))	//as long as some enemies are alive (should be updated in next phases)
+	{
+		CurrentTimeStep++;
+		ActivateEnemies();
+
+		Fight();
+	}
+	BattleCheck();
+	Save();
+	pGUI->PrintMessage("Output File is Saved ... Click to Close");
+	pGUI->waitForClick();
+}
 
 void Battle::Kill(Enemy* &E) {
 	KilledCount++;
@@ -207,6 +275,9 @@ void Battle::Kill(Enemy* &E) {
 			ActiveHealers--;
 			ActiveCount--;
 			KilledHealers++;
+			if (E->GetDistance() <= 5) {
+				BCastle.SetHealth(BCastle.GetHealth() + 0.03 * BCastle.GetMaxHealth());
+			}
 		}
 		else if (dynamic_cast<Freezer*>(E)) {
 			ActiveFreezers--;
@@ -224,6 +295,9 @@ void Battle::Kill(Enemy* &E) {
 			FrostedCount--;
 			FrostedHealers--;
 			KilledHealers++;
+			if (E->GetDistance() <= 5) {
+				BCastle.SetHealth(BCastle.GetHealth() + 0.03 * BCastle.GetMaxHealth());
+			}
 		}
 		else if (dynamic_cast<Freezer*>(E)) {
 			FrostedFreezers--;
@@ -232,6 +306,9 @@ void Battle::Kill(Enemy* &E) {
 		}
 	}
 	E->SetStatus(KILD);
+	E->SetKillDelay(CurrentTimeStep - E->GetFirstShot());
+	E->SetTimeKilled(CurrentTimeStep);
+	E->SetLifeTime(CurrentTimeStep - E->GetArrvTime());
 	Q_KilledEnemies.enqueue(E);
 }
 
@@ -243,32 +320,57 @@ void Battle::CastleAttack()
 			if (!Q_ActiveFighter.isEmpty())
 			{
 				Q_ActiveFighter.dequeue(E);
+				if (!E->IsDamaged()) {
+					E->SetFirstShot(CurrentTimeStep);
+					E->SetFirstShotDelay(CurrentTimeStep - E->GetArrvTime());
+					E->Damaged();
+				}
 				BCastle.Damage(E);
 				Q_DamagedEnemies.enqueue(E);
+				
 			}
 			else {
 				if (!Q_ActiveHealer.isEmpty()) {
 					Q_ActiveHealer.pop(E);
+					if (!E->IsDamaged()) {
+						E->SetFirstShot(CurrentTimeStep);
+						E->SetFirstShotDelay(CurrentTimeStep - E->GetArrvTime());
+						E->Damaged();
+					}
 					BCastle.Damage(E);
 					Q_DamagedEnemies.enqueue(E);
 				}
 				else {
 					if (!Q_ActiveFreezer.isEmpty()) {
 						Q_ActiveFreezer.dequeue(E);
+						if (!E->IsDamaged()) {
+							E->SetFirstShot(CurrentTimeStep);
+							E->SetFirstShotDelay(CurrentTimeStep - E->GetArrvTime());
+							E->Damaged();
+						}
 						BCastle.Damage(E);
 						Q_DamagedEnemies.enqueue(E);
+						
 					}
 					else {
 						if (!Q_FrozenEnemies.isEmpty()) {
 							Q_FrozenEnemies.dequeue(E);
+							if (!E->IsDamaged()) {
+								E->SetFirstShot(CurrentTimeStep);
+								E->SetFirstShotDelay(CurrentTimeStep - E->GetArrvTime());
+								E->Damaged();
+							}
 							BCastle.Damage(E);
 							Q_DamagedEnemies.enqueue(E);
+							
 						}
 					}
 				}
 			}
 		}
 		for (int i = 0; i < BCastle.GetNumberOfEnemies(); i++) {
+			if (Q_DamagedEnemies.isEmpty())
+				break;
 			Q_DamagedEnemies.dequeue(E);
 			if (E->GetHealth() == 0) {
 				Kill(E);
@@ -292,6 +394,7 @@ void Battle::CastleAttack()
 void Battle::CastleFreeze() {
 	Enemy* E;
 	for (int i = 0; i < BCastle.GetNumberOfEnemies(); i++) {
+
 		if (!Q_ActiveFighter.isEmpty()){
 			Q_ActiveFighter.dequeue(E);
 			ActiveFighters--;
@@ -299,6 +402,8 @@ void Battle::CastleFreeze() {
 			E->SetFreezingTime(BCastle.GetPower());
 			E->SetStatus(FRST);
 			Q_FrozenEnemies.enqueue(E,E->GetFreezingTime());
+			FrostedCount++;
+			ActiveCount--;
 		}
 		else {
 			if (!Q_ActiveHealer.isEmpty()) {
@@ -308,6 +413,8 @@ void Battle::CastleFreeze() {
 				E->SetFreezingTime(BCastle.GetPower());
 				E->SetStatus(FRST);
 				Q_FrozenEnemies.enqueue(E, E->GetFreezingTime());
+				FrostedCount++;
+				ActiveCount--;
 			}
 			else {
 				if (!Q_ActiveFreezer.isEmpty()) {
@@ -317,6 +424,8 @@ void Battle::CastleFreeze() {
 					E->SetFreezingTime(BCastle.GetPower());
 					E->SetStatus(FRST);
 					Q_FrozenEnemies.enqueue(E, E->GetFreezingTime());
+					FrostedCount++;
+					ActiveCount--;
 				}
 			}
 		}
@@ -341,31 +450,33 @@ void Battle::DefrostEnemies() {
 void Battle::RestoreFrozen()
 {
 	Enemy* E;
-	while(Q_FrozenEnemies.peekFront(E))
+	while(Q_FrozenEnemies.peekFront(E) && E->GetFreezingTime() <= 0)
 	{
-		if (E->GetFreezingTime() <= 0)
+		
+		
+		Q_FrozenEnemies.dequeue(E);
+		E->SetStatus(ACTV);
+		if (dynamic_cast<Fighter*>(E))
 		{
-			Q_FrozenEnemies.dequeue(E);
-			E->SetStatus(ACTV);
-			if (dynamic_cast<Fighter*>(E))
-			{
-				Q_ActiveFighter.enqueue(E,dynamic_cast<Fighter*>(E)->GetPriority());
-				ActiveFighters++;
-				FrostedFighters--;
-			}
-			else if (dynamic_cast<Healer*>(E))
-			{
-				Q_ActiveHealer.push(E);
-				ActiveHealers++;
-				FrostedHealers--;
-			}
-			else if (dynamic_cast<Freezer*>(E))
-			{
-				Q_ActiveFreezer.enqueue(E);
-				ActiveFreezers++;
-				FrostedFreezers--;
-			}		
+			Q_ActiveFighter.enqueue(E,dynamic_cast<Fighter*>(E)->GetPriority());
+			ActiveFighters++;
+			FrostedFighters--;
 		}
+		else if (dynamic_cast<Healer*>(E))
+		{
+			Q_ActiveHealer.push(E);
+			ActiveHealers++;
+			FrostedHealers--;
+		}
+		else if (dynamic_cast<Freezer*>(E))
+		{
+			Q_ActiveFreezer.enqueue(E);
+			ActiveFreezers++;
+			FrostedFreezers--;
+		}
+		ActiveCount++;
+		FrostedCount--;
+		
 	}
 }
 
@@ -377,19 +488,77 @@ void Battle::Save()
 	myfile.open("example.txt");
 
 	if (BattleCheck() == WIN)
+	{
 		myfile << "Game Is WIN.\n";
+		myfile << "KTS\t ID\t FD\t KD\t LT\n";
+
+		double c = 0;
+		double sumFSD = 0;
+		double sumKD = 0;
+		Enemy* E;
+		while (!Q_KilledEnemies.isEmpty())
+		{
+			Q_KilledEnemies.dequeue(E);
+			sumFSD += E->GetFirstShotDelay();
+			sumKD += E->GetKillDelay();
+			c++;
+			myfile << E->GetTimeKilled() << "\t" << E->GetID() << "\t" << E->GetFirstShotDelay() << "\t" << E->GetKillDelay() << "\t" << E->GetLifeTime() << "\n";
+		}
+
+		myfile << ".................................\n";
+		myfile << ".................................\n";
+
+		myfile << "Castle Total Damage:		" << BCastle.GetMaxHealth() - BCastle.GetHealth() << "\n";
+		myfile << "Total Enemies:		" << KilledCount << "\n";
+		myfile << "Average First Shot Delay:		" << sumFSD / c << "\n";
+		myfile << "Average Kill Delay:		" << sumKD / c << "\n";
+	}
 	else if (BattleCheck() == LOSS)
 		myfile << "Game Is LOSS.\n";
 	else
 		myfile << "Game Is DRAWN.\n";
 
-	myfile << "KTS\t ID\t FD\t KD\t LT\n";
+	if (BattleCheck() == LOSS || BattleCheck() == DRAW)
+	{
+		myfile << "KTS\t ID\t FD\t KD\t LT\n";
+
+		double c = 0;
+		double sumFSD = 0;
+		double sumKD = 0;
+		Enemy* E;
+		while (!Q_KilledEnemies.isEmpty())
+		{
+			Q_KilledEnemies.dequeue(E);
+			sumFSD += E->GetFirstShotDelay();
+			sumKD += E->GetKillDelay();
+			c++;
+			myfile << E->GetTimeKilled() << "\t" << E->GetID() << "\t" << E->GetFirstShotDelay() << "\t" << E->GetKillDelay() << "\t" << E->GetLifeTime() << "\n";
+		}
+
+		myfile << ".................................\n";
+		myfile << ".................................\n";
+
+		myfile << "Number of killed enemies:		" << KilledFighters + KilledFreezers + KilledHealers << "\n";
+		myfile << "Number of alive enemies (active and inactive):		" << ActiveCount + FrostedCount << "\n";
+		myfile << "Average First Shot Delay:		" << sumFSD / c << "\n";
+		myfile << "Average Kill Delay:		" << sumKD / c << "\n";
+	}
 
 	myfile.close();
 }
 
-GAME_RESULT Battle::BattleCheck() {
 
+GAME_RESULT Battle::BattleCheck() {
+	if (BCastle.GetHealth() <= 0 && ActiveCount > 0) {
+		return LOSS;
+	}
+	else if (BCastle.GetHealth() > 0) {
+		return WIN;
+	}
+	else {
+
+		return DRAW;
+	}
 }
 
 void Battle::EnemyAct() {
@@ -445,8 +614,18 @@ void Battle::EnemyAct() {
 
 }
 
-void Battle::ActivateCastle() {
-	if (CurrentTimeStep >= CastleDefreezeTimeStep)
-		BCastle.SetStatus(ACTV);
+void Battle::FreezeCastle() {
+	if (BCastle.GetAccumulatedIce() >= 100) {
+		CastleDefreezeTimeStep = CurrentTimeStep + 2;
+		BCastle.SetStatus(FRST);
+	}
 }
+
+void Battle::ActivateCastle() {
+	if (CurrentTimeStep >= CastleDefreezeTimeStep) {
+		BCastle.SetStatus(ACTV);
+		BCastle.SetAccumulatedIce(0);
+	}
+}
+
 

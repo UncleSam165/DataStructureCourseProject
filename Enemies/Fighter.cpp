@@ -8,7 +8,8 @@ Fighter::Fighter(int id, int arrTime, int d) :Enemy(id, arrTime, d) {
 
 
 void Fighter::Move() {
-	DecrementDist();
+	if(status==ACTV)
+		DecrementDist();
 }
 
 void Fighter::Act(Castle &C) {

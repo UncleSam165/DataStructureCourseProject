@@ -1,6 +1,8 @@
 #include "Castle.h"
 #include<cstdlib>
-
+class Fighter;
+class Healer;
+class Freezer;
 
 bool Castle::isDestroyed()
 {
@@ -66,21 +68,24 @@ ENMY_STATUS Castle::GetStatus() const {
 
 void Castle::Damage(Enemy* &E) {
 	double damage, distance = (double)E->GetDistance(), K;
-	if (dynamic_cast<Healer*>(E)) { K = 2; }
+	if (E->GetType() == HEALER) { K = 2; }
 	else { K = 1; }
 	damage = (1 / distance) * Power * (1 / K);
-	E->SetHealth(min(0,E->GetHealth() - damage));	
+	E->SetHealth(max(0,E->GetHealth() - damage));	
 }
 
 void Castle::SetAccumulatedIce(double d) {
 	AccomultedIce = d;
-	if (AccomultedIce >= 100) {
-		this->SetStatus(FRST);
-		AccomultedIce = 0;
-	}
-
 }
 
 double Castle::GetAccumulatedIce() {
 	return AccomultedIce;
+}
+
+void Castle::SetMaxHealth(double CH) {
+	MaxHealth = CH;
+}
+
+double Castle::GetMaxHealth() {
+	return	MaxHealth;
 }

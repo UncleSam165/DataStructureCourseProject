@@ -1,11 +1,17 @@
 #pragma once
 
-#include "Enemies\Enemy.h"
 #include "Castle\Castle.h"
+#include "Enemies/Fighter.h"
+#include "Enemies/Freezer.h"
+#include "Enemies/Healer.h"
 #include "Generic_DS\Queue.h"
 #include "Generic_DS/PriorityQ.h"
 #include "Generic_DS/Stack.h"
 #include "GUI\GUI.h"
+#include <time.h>
+#include "ReadInputFile.h"
+#include <fstream>
+#include <string>
 
 // it is the controller of the project
 class Battle
@@ -57,6 +63,9 @@ public:
 	void EnemyAct();
 	void ActivateCastle();
 	void DefrostEnemies();
+	void StepByStep();
+	void Silent();
+	void FreezeCastle();
 };
  
 

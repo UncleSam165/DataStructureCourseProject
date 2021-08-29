@@ -1,5 +1,6 @@
 #pragma once
 #include "Enemy.h"
+#include "..\Castle\Castle.h"
 
 class Fighter :public Enemy {
 private:
@@ -8,8 +9,7 @@ public:
 	Fighter(int id, int arrTime, int d = MaxDistance);
 
 	void Move();
-	void Act();
-	void Act(Castle &E);
+	void Act(Castle &C);
 	void UpdatePriority();
 	double GetPriority();
 };

@@ -3,10 +3,7 @@
 #include<fstream>
 #include"Castle/Castle.h"
 #include"Battle.h"
-#include"./Enemies/Enemy.h"
-#include"./Enemies/Fighter.h"
-#include"./Enemies/Freezer.h"
-#include"./Enemies/Healer.h"
+
 using namespace std;
 void ReadInputFile(string filename, Queue<Enemy*> &Q_Inactive, Castle &BCastle)
 {
@@ -24,6 +21,7 @@ void ReadInputFile(string filename, Queue<Enemy*> &Q_Inactive, Castle &BCastle)
 	inputFile >> CH >> N >> CP;
 	cout << "CASTLE HEALTH IS " << CH << " " << "N is " << N << " " << "CASTLE POWER is " << CP << endl; // print Castle Data on the conselo
 	BCastle.SetHealth(CH);
+	BCastle.SetMaxHealth(CH);
 	BCastle.SetNumberOfEnemies(N);
 	BCastle.SetPower(CP);
 	cout << BCastle.GetHealth() << "HIIII" << BCastle.GetNumberOfEnemies() << "     " << BCastle.GetPower() << endl;
@@ -73,9 +71,6 @@ void ReadInputFile(string filename, Queue<Enemy*> &Q_Inactive, Castle &BCastle)
 
 
 	}
-
-
-
 	inputFile.close();
 	cout << "Closed!" << endl;
 }

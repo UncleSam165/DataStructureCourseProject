@@ -6,7 +6,8 @@ Freezer::Freezer(int id, int arrTime, int d ) :Enemy(id, arrTime, d) {
 };
 
 void Freezer::Move() {
-	DecrementDist();
+	if (status == ACTV)
+		DecrementDist();
 }
 
 void Freezer::Act(Castle &C) {

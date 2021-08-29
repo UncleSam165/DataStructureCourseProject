@@ -4,6 +4,7 @@
 Enemy::Enemy(int id, int arrTime, int d):ID(id),ArrvTime(arrTime)
 {
 	SetDistance(d);
+	FirstDamaged = false;
 }
 
 Enemy::~Enemy()
@@ -97,14 +98,7 @@ double Enemy::GetPower()const {
 
 void Enemy::SetFreezingTime(int S)
 {
-	if (dynamic_cast<Fighter*>(this) || dynamic_cast<Freezer*>(this))
-	{
-		FreezingTime = ceil(2 * (1 / Distance) * S);   // Assuming that the castle freezing power = 5
-	}
-	else
-	{
-		FreezingTime = ceil((1 / Distance) * S);
-	}
+	FreezingTime = ceil((double)S * (1 / (double)Distance));
 }
 
 int Enemy::GetFreezingTime() const
@@ -116,20 +110,40 @@ int Enemy::GetFirstShot(){
 	return FirstShot;
 }
 
+void Enemy::SetFirstShot(int FS) {
+	FirstShot = FS;
+}
+
 int Enemy::GetTimeKilled() {
 	return TimeKilled;
+}
+
+void Enemy::SetTimeKilled(int KTS) {
+	TimeKilled = KTS;
 }
 
 int Enemy::GetFirstShotDelay() {
 	return FirstShotDelay;
 }
 
+void Enemy::SetFirstShotDelay(int FSD) {
+	FirstShotDelay = FSD;
+}
+
 int Enemy::GetKillDelay() {
 	return KillDelay;
 }
 
+void Enemy::SetKillDelay(int KD) {
+	KillDelay = KD;
+}
+
 int Enemy::GetLifeTime() {
 	return LifeTime;
+}
+
+void Enemy::SetLifeTime(int LT) {
+	LifeTime = LT;
 }
 
 ENMY_TYPE Enemy::GetType() const {
@@ -146,4 +160,12 @@ double Enemy::GetMaxHealth() {
 
 void Enemy::DecrementFreeze() {
 	FreezingTime--;
+}
+
+bool Enemy::IsDamaged() {
+	return FirstDamaged;
+}
+
+void Enemy::Damaged() {
+	FirstDamaged = true;
 }

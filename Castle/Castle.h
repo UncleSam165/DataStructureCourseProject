@@ -1,17 +1,12 @@
 #pragma once
-#include "..\Defs.h"
-#include "..\Generic_DS\PriorityQ.h"
-#include "..\Generic_DS\Queue.h"
-#include "..\Generic_DS\Stack.h"
-#include "..\Enemies\Fighter.h"
-#include "..\Enemies\Healer.h"
-#include "..\Enemies\Freezer.h"
+#include "..\Enemies\Enemy.h"
 #include <cstdlib>
 
 class Castle
 {
 	int NumberOfEnemies;			//Number of enemies can be killed in time step
 	double Health;                   //Health of the Castle
+	double MaxHealth;
 	double Power;                    //Power of the Castle
 	double AccomultedIce;
 	ENMY_STATUS status;
@@ -34,5 +29,7 @@ public:
 	void Damage(Enemy* &E);
 	void SetAccumulatedIce(double d);
 	double GetAccumulatedIce();
+	void SetMaxHealth(double CH);
+	double GetMaxHealth();
 };
  

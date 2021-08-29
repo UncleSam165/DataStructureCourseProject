@@ -1,5 +1,4 @@
 #pragma once
-#include "../Castle/Castle.h"
 #include "..\Defs.h"
 #include "..\CMUgraphicsLib\CMUgraphics.h"
 
@@ -21,6 +20,7 @@ protected:
 	double ReloadPeriod;        //Enemy reload period
 	double Speed;               //Enemy Speed
 	double Power;               //Enemy Power
+	bool FirstDamaged;
 
 	int FirstShot;              //The time of first shoot
 	int TimeKilled;             //The time of being killed
@@ -69,13 +69,17 @@ public:
 	int GetFirstShotDelay();         
 	int GetKillDelay();              
 	int GetLifeTime();
+	void SetFirstShot(int FS);
+	void SetTimeKilled(int KTS);
+	void SetFirstShotDelay(int FSD);
+	void SetKillDelay(int KD);
+	void SetLifeTime(int LT);
 	void DecrementFreeze();
-
+	bool IsDamaged();
+	void Damaged();
 
 	// Virtual Functions: ----------------
         virtual void Move() = 0;	//All enemies can move
-        virtual void Act() = 0;	//Acting means fighting or healing
-        
 
 	
 

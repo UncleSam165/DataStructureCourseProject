@@ -2,7 +2,7 @@
 #define __GUI_H_
 
 #include "..\CMUgraphicsLib\CMUgraphics.h"
-#include "..\Defs.h"
+
 
 #include "..\Enemies\Enemy.h"
 
