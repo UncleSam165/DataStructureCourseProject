@@ -7,7 +7,7 @@ public:
 	Freezer(int id, int arrTime, int d = MaxDistance);
 
 	void Move();
-	void Act();
+	void Act(double & AccumulatedIce) ;
        
 
 
