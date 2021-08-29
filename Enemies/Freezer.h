@@ -8,7 +8,7 @@ public:
 
 	void Move();
 	void Act();
-        void Heal();
+       
 
 
 };
