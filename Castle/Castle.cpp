@@ -36,8 +36,12 @@ void Castle::SetHealth(double h)
 		Health = 0; // killed
 }
 
-void Castle::DecrementHealth()
+void Castle::DecrementHealth(double damage)
 {
+if (isDestroyed())
+		return;
+	Health -= damage;
+
 }
 
 void Castle::SetPower(double P) {
