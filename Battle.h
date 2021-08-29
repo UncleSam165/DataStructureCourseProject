@@ -24,6 +24,7 @@ private:
 											// to point to the current active enemies 
 											// then pass the pointers list to the GUI function
 
+	GAME_RESULT result;
 	Queue<Enemy*> Q_Inactive;		//Queue of inactive enemies
 	PriorityQ<Enemy*,double> Q_ActiveFighter;
 	Stack<Enemy*> Q_ActiveHealer;
@@ -50,6 +51,7 @@ public:
 	void CastleAttack();
 	void CastleFreeze();
 	void RestoreFrozen();
+	GAME_RESULT BattleCheck();
 	void Save();
 };
  

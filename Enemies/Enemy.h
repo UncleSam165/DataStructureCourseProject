@@ -8,13 +8,10 @@ class GUI;
 // Enemy should be an abstract class in next phases
 class Enemy
 {
-        static double HealthHeal;
-
 protected:
 	const int ID;               //Each enemy has a unique ID (sequence number)
 	const int ArrvTime;	        //arrival time (time it starts to join battle)
-
-        Castle* NewCastle;
+	static double HealthHeal;
 	ENMY_STATUS status;	        //status of the enemy (inactive, inactive, frosted, killed)
 	ENMY_TYPE Type;             //Type of the enemy (Fighter, Healer, Freezer)
 	int Distance;	            //Horizontal distance between enemy & the tower of its region

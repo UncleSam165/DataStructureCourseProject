@@ -361,3 +361,8 @@ void Battle::Save()
 
 	myfile.close();
 }
+
+GAME_RESULT Battle::BattleCheck() {
+
+}
+

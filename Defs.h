@@ -40,5 +40,13 @@ enum PROG_MODE	//mode of the program interface
 	MODE_CNT	//number of possible modes
 };
 
+enum GAME_RESULT
+{
+	WIN, // Game is a WIN
+	LOSS, // Game is a LOSS
+	DRAW, // Game is a DRAW
+	GAME_RESULT_CNT
+};
+
 
 
