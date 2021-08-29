@@ -9,6 +9,7 @@ public:
 
 	void Move();
 	void Act();
+        void Heal();
 	void UpdatePriority();
 	double GetPriority();
 };
