@@ -27,4 +27,7 @@ void Healer::Move() {
 }
 
 void Healer::Act() {
+if ((int)(CurrentTimeStep - ArrvTime) % ((int)ReloadPeriod + 1) == 0) {
+		SetHealthHeal(Power);
+	}
 } 
