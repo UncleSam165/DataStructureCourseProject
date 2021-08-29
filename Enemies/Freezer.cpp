@@ -11,11 +11,7 @@ void Freezer::Move() {
 
 void Freezer::Act() {
 
-}
-
-
-void Freezer::Heal() {
-	if (status != KILD) {
+if (status != KILD) {
 		Health += GetHealthHeal();
 	}
 }
