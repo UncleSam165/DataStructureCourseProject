@@ -11,7 +11,17 @@ void Fighter::Move() {
 }
 
 void Fighter::Act() {
+if ((int)(CurrentTimeStep - ArrvTime) % ((int)ReloadPeriod + 1) == 0) {
+		double Damage = (K * Power) / Distance;
+		NewCastle->DecrementHealth(Damage);
+	}
 
+}
+
+void Fighter::Heal() {
+	if (status != KILD) {
+		Health += GetHealthHeal();
+	}
 }
 
 void Fighter::UpdatePriority() {
