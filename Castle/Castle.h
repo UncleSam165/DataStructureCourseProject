@@ -10,9 +10,10 @@
 
 class Castle
 {
-	int NumberOfEnemies;             //Number of enemies can be killed in time step
+	int NumberOfEnemies;			//Number of enemies can be killed in time step
 	double Health;                   //Health of the Castle
 	double Power;                    //Power of the Castle
+	double AccomultedIce;
 	ENMY_STATUS status;
 
 public:
@@ -31,5 +32,7 @@ public:
 	void SetStatus(ENMY_STATUS S);
 	ENMY_STATUS GetStatus() const;
 	void Damage(Enemy* &E);
+	void SetAccumulatedIce(double d);
+	double GetAccumulatedIce();
 };
  

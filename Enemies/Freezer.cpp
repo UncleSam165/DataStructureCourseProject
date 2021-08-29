@@ -9,9 +9,6 @@ void Freezer::Move() {
 	DecrementDist();
 }
 
-void Freezer::Act(double & AccumulatedIce) {
-AccumulatedIce=AccumulatedIce+(Power*Health/Distance); 
-if (status != KILD) {
-		Health += GetHealthHeal();
-	}
+void Freezer::Act(Castle &C) {
+	C.SetAccumulatedIce(C.GetAccumulatedIce() + (Power * Health / Distance));
 }

@@ -52,6 +52,7 @@ void ReadInputFile(string filename, Queue<Enemy*> &Q_Inactive, Castle &BCastle)
 			}
 			inputFile >> H;
 			pE->SetHealth(H);
+			pE->SetMaxHealth(H);
 			cout << "H" << "       " << H << endl;
 			inputFile >> POW;
 			pE->SetPower(POW);

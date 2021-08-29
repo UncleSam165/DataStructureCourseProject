@@ -1,5 +1,5 @@
 #include "Enemy.h"
-
+#include <cstdlib>
 
 Enemy::Enemy(int id, int arrTime, int d):ID(id),ArrvTime(arrTime)
 {
@@ -94,23 +94,16 @@ double Enemy::GetPower()const {
 	return Power;
 }
 
-void Enemy::SetHealthHeal(double HH) {
-         HealthHeal=HH;
-} 
-
-double Enemy::GetHealthHeal(){
-          return HealthHeal;
-} 
 
 void Enemy::SetFreezingTime(int S)
 {
-	if (GetType() == FIGHTER || GetType() == HEALER)
+	if (dynamic_cast<Fighter*>(this) || dynamic_cast<Freezer*>(this))
 	{
-		FreezingTime = 2 * (1 / S) * 5;   // Assuming that the castle freezing power = 5
+		FreezingTime = ceil(2 * (1 / Distance) * S);   // Assuming that the castle freezing power = 5
 	}
 	else
 	{
-		FreezingTime = (1 / S) * 5;
+		FreezingTime = ceil((1 / Distance) * S);
 	}
 }
 
@@ -141,4 +134,16 @@ int Enemy::GetLifeTime() {
 
 ENMY_TYPE Enemy::GetType() const {
 	return Type;
+}
+
+void Enemy::SetMaxHealth(double H) {
+	MaxHealth = H;
+}
+
+double Enemy::GetMaxHealth() {
+	return MaxHealth;
+}
+
+void Enemy::DecrementFreeze() {
+	FreezingTime--;
 }

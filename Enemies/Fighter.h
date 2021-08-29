@@ -8,7 +8,8 @@ public:
 	Fighter(int id, int arrTime, int d = MaxDistance);
 
 	void Move();
-	void Act(Enemy* E);
+	void Act();
+	void Act(Castle &E);
 	void UpdatePriority();
 	double GetPriority();
 };

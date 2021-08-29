@@ -26,8 +26,11 @@ void Healer::Move() {
 	}	
 }
 
-void Healer::Act() {
-if ((int)(CurrentTimeStep - ArrvTime) % ((int)ReloadPeriod + 1) == 0) {
-		SetHealthHeal(Power);
+void Healer::Act(Enemy*& E) {
+	if ((int)(CurrentTimeStep - ArrvTime) % ((int)ReloadPeriod + 1) == 0) {
+		if ((direction == 1 && (E->GetDistance() <= Distance && E->GetDistance() >= Distance - 5)) || (direction == 0 && (E->GetDistance() >= Distance && E->GetDistance() <= Distance + 5))) {
+			HealthHeal = (Health / MaxHealth) * Power * 2 * (E->GetMaxHealth() / 100);
+			E->SetHealth(E->GetHealth() + HealthHeal);
+		}
 	}
-} 
+}

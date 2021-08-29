@@ -16,7 +16,8 @@ private:
 	int EnemyCount;	//the actual number of enemies in the game
 	int ActiveCount, ActiveFighters, ActiveHealers, ActiveFreezers, 
 	FrostedCount,FrostedFighters,FrostedHealers,FrostedFreezers,
-	KilledCount,KilledFighters,KilledHealers,KilledFreezers;	//no. of enemies (Active, Frosted, killed so far)
+	KilledCount,KilledFighters,KilledHealers,KilledFreezers,
+		CastleDefreezeTimeStep;	//no. of enemies (Active, Frosted, killed so far)
 	Enemy * BEnemiesForDraw[MaxEnemyCount]; // This Array of Pointers is used for drawing elements in the GUI
 								  			// No matter what list type you are using to hold enemies, 
 											// you must pass the enemies to the GUI function as an array of enemy pointers. 
@@ -30,7 +31,7 @@ private:
 	Stack<Enemy*> Q_ActiveHealer;
 	Queue<Enemy*> Q_ActiveFreezer;
 	Queue<Enemy*> Q_KilledEnemies;
-	Queue<Enemy*> Q_FrozenEnemies;
+	PriorityQ<Enemy*,int> Q_FrozenEnemies;
 
 
 	
@@ -53,6 +54,9 @@ public:
 	void RestoreFrozen();
 	GAME_RESULT BattleCheck();
 	void Save();
+	void EnemyAct();
+	void ActivateCastle();
+	void DefrostEnemies();
 };
  
 

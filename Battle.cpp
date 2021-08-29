@@ -21,6 +21,7 @@ Battle::Battle()
 	KilledHealers = 0;
 	KilledFreezers = 0;
 	CurrentTimeStep = 0;
+	CastleDefreezeTimeStep = 0;
 	pGUI = NULL;
 	BCastle.SetStatus(ACTV);
 }
@@ -105,6 +106,9 @@ void Battle::Move()
 
 void Battle::Fight()
 {
+	ActivateCastle();
+	DefrostEnemies();
+	RestoreFrozen();
 	CastleAttack();
 }
 
@@ -233,51 +237,53 @@ void Battle::Kill(Enemy* &E) {
 
 void Battle::CastleAttack()
 {
-	Enemy* E; Queue<Enemy*> Q_DamagedEnemies;
-	for (int i = 0; i < BCastle.GetNumberOfEnemies(); i++) {
-		if (!Q_ActiveFighter.isEmpty())
-		{
-			Q_ActiveFighter.dequeue(E);
-			BCastle.Damage(E);
-			Q_DamagedEnemies.enqueue(E);
-		}
-		else {
-			if (!Q_ActiveHealer.isEmpty()) {
-				Q_ActiveHealer.pop(E);
+	if (BCastle.GetStatus() != FRST) {
+		Enemy* E; Queue<Enemy*> Q_DamagedEnemies;
+		for (int i = 0; i < BCastle.GetNumberOfEnemies(); i++) {
+			if (!Q_ActiveFighter.isEmpty())
+			{
+				Q_ActiveFighter.dequeue(E);
 				BCastle.Damage(E);
 				Q_DamagedEnemies.enqueue(E);
 			}
 			else {
-				if (!Q_ActiveFreezer.isEmpty()) {
-					Q_ActiveFreezer.dequeue(E);
+				if (!Q_ActiveHealer.isEmpty()) {
+					Q_ActiveHealer.pop(E);
 					BCastle.Damage(E);
 					Q_DamagedEnemies.enqueue(E);
 				}
 				else {
-					if (!Q_FrozenEnemies.isEmpty()) {
-						Q_FrozenEnemies.dequeue(E);
+					if (!Q_ActiveFreezer.isEmpty()) {
+						Q_ActiveFreezer.dequeue(E);
 						BCastle.Damage(E);
 						Q_DamagedEnemies.enqueue(E);
+					}
+					else {
+						if (!Q_FrozenEnemies.isEmpty()) {
+							Q_FrozenEnemies.dequeue(E);
+							BCastle.Damage(E);
+							Q_DamagedEnemies.enqueue(E);
+						}
 					}
 				}
 			}
 		}
-	}
-	for (int i = 0; i < BCastle.GetNumberOfEnemies(); i++) {
-		Q_DamagedEnemies.dequeue(E);
-		if (E->GetHealth() == 0) {
-			Kill(E);
-		}
-		else {
-			if (dynamic_cast<Fighter*>(E)) {
-				dynamic_cast<Fighter*>(E)->UpdatePriority();
-				Q_ActiveFighter.enqueue(E, dynamic_cast<Fighter*>(E)->GetPriority());
+		for (int i = 0; i < BCastle.GetNumberOfEnemies(); i++) {
+			Q_DamagedEnemies.dequeue(E);
+			if (E->GetHealth() == 0) {
+				Kill(E);
 			}
-			else if (dynamic_cast<Healer*>(E)) {
-				Q_ActiveHealer.push(E);
-			}
-			else if (dynamic_cast<Freezer*>(E)) {
-				Q_ActiveFreezer.enqueue(E);
+			else {
+				if (dynamic_cast<Fighter*>(E)) {
+					dynamic_cast<Fighter*>(E)->UpdatePriority();
+					Q_ActiveFighter.enqueue(E, dynamic_cast<Fighter*>(E)->GetPriority());
+				}
+				else if (dynamic_cast<Healer*>(E)) {
+					Q_ActiveHealer.push(E);
+				}
+				else if (dynamic_cast<Freezer*>(E)) {
+					Q_ActiveFreezer.enqueue(E);
+				}
 			}
 		}
 	}
@@ -290,59 +296,79 @@ void Battle::CastleFreeze() {
 			Q_ActiveFighter.dequeue(E);
 			ActiveFighters--;
 			FrostedFighters++;
-			E->SetFreezingTime(E->GetDistance());
+			E->SetFreezingTime(BCastle.GetPower());
+			E->SetStatus(FRST);
+			Q_FrozenEnemies.enqueue(E,E->GetFreezingTime());
 		}
 		else {
 			if (!Q_ActiveHealer.isEmpty()) {
 				Q_ActiveHealer.pop(E);
 				ActiveHealers--;
 				FrostedHealers++;
-				E->SetFreezingTime(E->GetDistance());
+				E->SetFreezingTime(BCastle.GetPower());
+				E->SetStatus(FRST);
+				Q_FrozenEnemies.enqueue(E, E->GetFreezingTime());
 			}
 			else {
 				if (!Q_ActiveFreezer.isEmpty()) {
 					Q_ActiveFreezer.dequeue(E);
 					ActiveFreezers--;
 					FrostedFreezers++;
-					E->SetFreezingTime(E->GetDistance());
+					E->SetFreezingTime(BCastle.GetPower());
+					E->SetStatus(FRST);
+					Q_FrozenEnemies.enqueue(E, E->GetFreezingTime());
 				}
 			}
 		}
-		E->SetStatus(FRST);
-		Q_FrozenEnemies.enqueue(E);
+	}
+}
+
+void Battle::DefrostEnemies() {
+	Enemy* E; Queue<Enemy*> Temp;
+	while (!Q_FrozenEnemies.isEmpty())	//as long as there are more inactive enemies
+	{
+		Q_FrozenEnemies.dequeue(E);
+		E->DecrementFreeze();
+		Temp.enqueue(E);
+	}
+	while (!Temp.isEmpty())
+	{
+		Temp.dequeue(E);
+		Q_FrozenEnemies.enqueue(E, E->GetFreezingTime());
 	}
 }
 
 void Battle::RestoreFrozen()
 {
 	Enemy* E;
-	while(!Q_FrozenEnemies.isEmpty())
+	while(Q_FrozenEnemies.peekFront(E))
 	{
-		if (E->GetFreezingTime() == 0)
+		if (E->GetFreezingTime() <= 0)
 		{
-			if (E->GetType() == FIGHTER) 
+			Q_FrozenEnemies.dequeue(E);
+			E->SetStatus(ACTV);
+			if (dynamic_cast<Fighter*>(E))
 			{
-				Q_ActiveFighter.enqueue(E,E->GetHealth());
+				Q_ActiveFighter.enqueue(E,dynamic_cast<Fighter*>(E)->GetPriority());
 				ActiveFighters++;
 				FrostedFighters--;
 			}
-			else if (!Q_ActiveHealer.isEmpty()) 
+			else if (dynamic_cast<Healer*>(E))
 			{
 				Q_ActiveHealer.push(E);
 				ActiveHealers++;
 				FrostedHealers--;
 			}
-			else if (!Q_ActiveFreezer.isEmpty()) 
+			else if (dynamic_cast<Freezer*>(E))
 			{
 				Q_ActiveFreezer.enqueue(E);
 				ActiveFreezers++;
 				FrostedFreezers--;
 			}		
 		}
-		E->SetStatus(ACTV);
-		Q_FrozenEnemies.dequeue(E);
 	}
 }
+
 
 
 void Battle::Save()
@@ -364,5 +390,63 @@ void Battle::Save()
 
 GAME_RESULT Battle::BattleCheck() {
 
+}
+
+void Battle::EnemyAct() {
+	Queue<Enemy*> Q_Temp; Stack<Enemy*> S; Enemy* E,*P;
+	while (!Q_ActiveFighter.isEmpty()) {
+		Q_ActiveFighter.dequeue(E);
+		dynamic_cast<Fighter*>(E)->Act(BCastle);
+		Q_Temp.enqueue(E);
+	}
+	while (!Q_Temp.isEmpty()) {
+		Q_Temp.dequeue(E);
+		Q_ActiveFighter.enqueue(E, dynamic_cast<Fighter*>(E)->GetPriority());
+	}
+	while (!Q_ActiveFreezer.isEmpty()) {
+		Q_ActiveFreezer.dequeue(E);
+		dynamic_cast<Freezer*>(E)->Act(BCastle);
+		Q_Temp.enqueue(E);
+	}
+	while (!Q_Temp.isEmpty()) {
+		Q_Temp.dequeue(E);
+		Q_ActiveFreezer.enqueue(E);
+	}
+
+	while (!Q_ActiveHealer.isEmpty()) {
+		Q_ActiveHealer.pop(E);
+		while (!Q_ActiveFighter.isEmpty())
+		{
+			Q_ActiveFighter.dequeue(P);
+			dynamic_cast<Healer*>(E)->Act(P);
+			dynamic_cast<Fighter*>(P)->UpdatePriority();
+			Q_Temp.enqueue(P);
+		}
+		while (!Q_Temp.isEmpty()) {
+			Q_Temp.dequeue(P);
+			Q_ActiveFighter.enqueue(P, dynamic_cast<Fighter*>(P)->GetPriority());
+		}
+		while (!Q_ActiveFreezer.isEmpty()) {
+			Q_ActiveFreezer.dequeue(P);
+			dynamic_cast<Healer*>(E)->Act(P);
+			Q_Temp.enqueue(P);
+		}
+		while (!Q_Temp.isEmpty()) {
+			Q_Temp.dequeue(P);
+			Q_ActiveFreezer.enqueue(P);
+		}
+		S.push(E);
+	}
+	while (!S.isEmpty())
+	{
+		S.pop(E);
+		Q_ActiveHealer.push(E);
+	}
+
+}
+
+void Battle::ActivateCastle() {
+	if (CurrentTimeStep >= CastleDefreezeTimeStep)
+		BCastle.SetStatus(ACTV);
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../Castle/Castle.h"
 #include "..\Defs.h"
 #include "..\CMUgraphicsLib\CMUgraphics.h"
 
@@ -11,13 +11,13 @@ class Enemy
 protected:
 	const int ID;               //Each enemy has a unique ID (sequence number)
 	const int ArrvTime;	        //arrival time (time it starts to join battle)
-	static double HealthHeal;
 	ENMY_STATUS status;	        //status of the enemy (inactive, inactive, frosted, killed)
 	ENMY_TYPE Type;             //Type of the enemy (Fighter, Healer, Freezer)
 	int Distance;	            //Horizontal distance between enemy & the tower of its region
 	                            //Always positive (ranges from 2 to 60)
 
 	double Health;	            //Enemy health
+	double MaxHealth;			//Initial Health of Enemy
 	double ReloadPeriod;        //Enemy reload period
 	double Speed;               //Enemy Speed
 	double Power;               //Enemy Power
@@ -59,9 +59,8 @@ public:
 	void SetPower(double P);
 	double GetPower() const;
 
-        void SetHealthHeal(double HH);
-        double GetHealthHeal();
-
+	void SetMaxHealth(double H);
+	double GetMaxHealth();
 	void SetFreezingTime(int S);
 	int GetFreezingTime() const;
 
@@ -70,6 +69,7 @@ public:
 	int GetFirstShotDelay();         
 	int GetKillDelay();              
 	int GetLifeTime();
+	void DecrementFreeze();
 
 
 	// Virtual Functions: ----------------

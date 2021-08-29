@@ -71,3 +71,16 @@ void Castle::Damage(Enemy* &E) {
 	damage = (1 / distance) * Power * (1 / K);
 	E->SetHealth(min(0,E->GetHealth() - damage));	
 }
+
+void Castle::SetAccumulatedIce(double d) {
+	AccomultedIce = d;
+	if (AccomultedIce >= 100) {
+		this->SetStatus(FRST);
+		AccomultedIce = 0;
+	}
+
+}
+
+double Castle::GetAccumulatedIce() {
+	return AccomultedIce;
+}
