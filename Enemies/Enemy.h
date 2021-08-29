@@ -8,11 +8,13 @@ class GUI;
 // Enemy should be an abstract class in next phases
 class Enemy
 {
+        static double HealthHeal;
 
 protected:
 	const int ID;               //Each enemy has a unique ID (sequence number)
 	const int ArrvTime;	        //arrival time (time it starts to join battle)
 
+        Castle* NewCastle;
 	ENMY_STATUS status;	        //status of the enemy (inactive, inactive, frosted, killed)
 	ENMY_TYPE Type;             //Type of the enemy (Fighter, Healer, Freezer)
 	int Distance;	            //Horizontal distance between enemy & the tower of its region
@@ -29,6 +31,7 @@ protected:
 	int KillDelay;              //The time elapsed between first time a castle shoots the enemy and its kill time
 	int LifeTime;               //The total time an enemy stays alive until being killed
 	int FreezingTime;
+        double K;
 
 public:
 	Enemy(int id,int arrTime, int d = MaxDistance);
@@ -59,6 +62,9 @@ public:
 	void SetPower(double P);
 	double GetPower() const;
 
+        void SetHealthHeal(double HH);
+        double GetHealthHeal();
+
 	void SetFreezingTime(int S);
 	int GetFreezingTime() const;
 
@@ -72,6 +78,7 @@ public:
 	// Virtual Functions: ----------------
         virtual void Move() = 0;	//All enemies can move
         virtual void Act() = 0;	//Acting means fighting or healing
+        virtual void Heal()=0;
 
 	
 
