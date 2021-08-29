@@ -17,13 +17,13 @@ if ((int)(CurrentTimeStep - ArrvTime) % ((int)ReloadPeriod + 1) == 0) {
 		NewCastle->DecrementHealth(Damage);
 	}
 
-}
 
-void Fighter::Heal() {
-	if (status != KILD) {
+       if (status != KILD) {
 		Health += GetHealthHeal();
 	}
 }
+
+	
 
 void Fighter::UpdatePriority() {
 	priority = Power * Health * ((double)static_cast<int>(GetStatus())) / (double)Distance;
