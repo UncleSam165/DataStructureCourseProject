@@ -14,7 +14,9 @@ class Castle
 	double Health;                   //Health of the Castle
 	double Power;                    //Power of the Castle
 	ENMY_STATUS status;
+	double MaxHealth;
 
+	
 public:
 	bool isDestroyed();
 
@@ -31,5 +33,7 @@ public:
 	void SetStatus(ENMY_STATUS S);
 	ENMY_STATUS GetStatus() const;
 	void Damage(Enemy* &E);
+
+	double GetMaxHealth() const;
 };
  

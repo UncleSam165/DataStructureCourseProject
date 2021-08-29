@@ -71,3 +71,8 @@ void Castle::Damage(Enemy* &E) {
 	damage = (1 / distance) * Power * (1 / K);
 	E->SetHealth(min(0,E->GetHealth() - damage));	
 }
+
+double Castle::GetMaxHealth() const
+{
+	return MaxHealth;
+}

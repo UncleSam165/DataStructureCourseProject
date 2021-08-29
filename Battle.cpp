@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 
+
 Battle::Battle()
 {
 	EnemyCount = 0;
@@ -351,27 +352,61 @@ void Battle::Save()
 	myfile.open("example.txt");
 
 	if (BattleCheck() == WIN)
+	{
 		myfile << "Game Is WIN.\n";
+		myfile << "KTS\t ID\t FD\t KD\t LT\n";
+
+		double c = 0;
+		double sumFSD = 0;
+		double sumKD = 0;
+		Enemy* E;
+		while (!Q_KilledEnemies.isEmpty())
+		{
+			Q_KilledEnemies.dequeue(E);
+			sumFSD += E->GetFirstShotDelay();
+			sumKD += E->GetKillDelay();
+			c++;
+			myfile << E->GetTimeKilled() << "\t" << E->GetID() << "\t" << E->GetFirstShotDelay() << "\t" << E->GetKillDelay()<<"\t"<< E->GetLifeTime() <<"\n";
+		}
+
+		myfile << ".................................\n";
+		myfile << ".................................\n";
+
+		myfile << "Castle Total Damage:		" << BCastle.GetMaxHealth() - BCastle.GetHealth() << "\n";
+		myfile << "Total Enemies:		" << KilledCount << "\n";
+		myfile << "Average First Shot Delay:		" << sumFSD /c << "\n";
+		myfile << "Average Kill Delay:		" << sumKD/c << "\n";
+	}
 	else if (BattleCheck() == LOSS)
 		myfile << "Game Is LOSS.\n";
 	else
 		myfile << "Game Is DRAWN.\n";
 
-	myfile << "KTS\t ID\t FD\t KD\t LT\n";
+	if (BattleCheck() == LOSS || BattleCheck() == DRAW)
+	{
+		myfile << "KTS\t ID\t FD\t KD\t LT\n";
 
+		double c = 0;
+		double sumFSD = 0;
+		double sumKD = 0;
+		Enemy* E;
+		while (!Q_KilledEnemies.isEmpty())
+		{
+			Q_KilledEnemies.dequeue(E);
+			sumFSD += E->GetFirstShotDelay();
+			sumKD += E->GetKillDelay();
+			c++;
+			myfile << E->GetTimeKilled() << "\t" << E->GetID() << "\t" << E->GetFirstShotDelay() << "\t" << E->GetKillDelay() << "\t" << E->GetLifeTime() << "\n";
+		}
 
-	myfile << ".................................\n";
-	myfile << ".................................\n";
-	
-	myfile << "Castle Total Damage:		"<< "castle damage" << "\n";
-	myfile << "Total Enemies:		" << "castle damage" << "\n";
-	myfile << "Average First Shot Delay:		" << "castle damage" << "\n";
-	myfile << "Average Kill Delay:		" << "castle damage" << "\n";
+		myfile << ".................................\n";
+		myfile << ".................................\n";
 
-
-
-
-
+		myfile << "Number of killed enemies:		" << KilledFighters + KilledFreezers + KilledHealers << "\n";
+		myfile << "Number of alive enemies (active and inactive):		" << ActiveCount + FrostedCount << "\n";
+		myfile << "Average First Shot Delay:		" << sumFSD / c << "\n";
+		myfile << "Average Kill Delay:		" << sumKD / c << "\n";
+	}
 
 	myfile.close();
 }
