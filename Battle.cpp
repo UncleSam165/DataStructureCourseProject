@@ -359,6 +359,20 @@ void Battle::Save()
 
 	myfile << "KTS\t ID\t FD\t KD\t LT\n";
 
+
+	myfile << ".................................\n";
+	myfile << ".................................\n";
+	
+	myfile << "Castle Total Damage:		"<< "castle damage" << "\n";
+	myfile << "Total Enemies:		" << "castle damage" << "\n";
+	myfile << "Average First Shot Delay:		" << "castle damage" << "\n";
+	myfile << "Average Kill Delay:		" << "castle damage" << "\n";
+
+
+
+
+
+
 	myfile.close();
 }
 
