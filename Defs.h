@@ -8,7 +8,7 @@
 								// (will be drawn vertical to each other)
 #define MaxEnemyCount 900       // the maximum number of enemies the application can work on
 
-int CurrrntTimeStep;
+int CurrentTimeStep;
 
 
 enum ENMY_TYPE	//types of enemies
